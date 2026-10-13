@@ -70,6 +70,10 @@ namespace Ketch
                     exitItem
                 });
 
+                // Ensure the menu closes when it loses focus or the user clicks outside
+                menu.Closed += (_, __) => menu.Dispose();
+                menu.LostFocus += (_, __) => { try { menu.Close(); } catch { } };
+
                 menu.Show(Cursor.Position);
             }
         }

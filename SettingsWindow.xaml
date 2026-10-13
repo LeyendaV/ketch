@@ -4,21 +4,43 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Settings" Height="480" Width="380" WindowStartupLocation="CenterOwner"
         WindowStyle="None" AllowsTransparency="True" Background="#22242a" ShowInTaskbar="False">
+    <Window.Resources>
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="#bac6e8" />
+            <Setter Property="Background" Value="#22242a" />
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="#bac6e8" />
+            <Setter Property="Background" Value="#22242a" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#bac6e8" />
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#bac6e8" />
+        </Style>
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#7aacff" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+    </Window.Resources>
+
     <Border Background="#22242a" Padding="16">
-        <StackPanel Margin="0" VerticalAlignment="Top" TextElement.Foreground="#bac6e8" TextElement.FontSize="14">
-            <TextBlock Text="Background Color" FontWeight="Bold" />
-            <ComboBox x:Name="cbBackground" Margin="0,6" />
+        <StackPanel Margin="0" VerticalAlignment="Center" TextElement.Foreground="#bac6e8" TextElement.FontSize="14" HorizontalAlignment="Center">
+            <TextBlock Text="Background Color" Style="{StaticResource SectionHeader}" />
+            <ComboBox x:Name="cbBackground" Margin="0,6" Width="320" />
 
-            <TextBlock Text="Font Color" FontWeight="Bold" Margin="0,8,0,0" />
-            <ComboBox x:Name="cbFont" Margin="0,6" />
+            <TextBlock Text="Font Color" Style="{StaticResource SectionHeader}" Margin="0,8,0,0" />
+            <ComboBox x:Name="cbFont" Margin="0,6" Width="320" />
 
-            <TextBlock Text="Opacity" FontWeight="Bold" Margin="0,8,0,0" />
+            <TextBlock Text="Opacity" Style="{StaticResource SectionHeader}" Margin="0,8,0,0" />
             <StackPanel Orientation="Horizontal" Margin="0,6">
                 <Slider x:Name="sliderOpacity" Minimum="10" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Width="220" />
                 <TextBlock x:Name="tbOpacityValue" Width="40" Margin="8,0,0,0" VerticalAlignment="Center" />
             </StackPanel>
 
-            <TextBlock Text="Size" FontWeight="Bold" Margin="0,8,0,0" />
+            <TextBlock Text="Size" Style="{StaticResource SectionHeader}" Margin="0,8,0,0" />
             <StackPanel Orientation="Horizontal" Margin="0,6">
                 <RadioButton x:Name="rbSizeHuge" Content="Huge" GroupName="Size" Margin="0,0,8,0" />
                 <RadioButton x:Name="rbSizeBig" Content="Big" GroupName="Size" Margin="0,0,8,0" />
@@ -26,7 +48,7 @@
                 <RadioButton x:Name="rbSizeSmall" Content="Small" GroupName="Size" />
             </StackPanel>
 
-            <TextBlock Text="Display Location" FontWeight="Bold" Margin="0,8,0,0" />
+            <TextBlock Text="Display Location" Style="{StaticResource SectionHeader}" Margin="0,8,0,0" />
             <StackPanel Orientation="Vertical" Margin="0,6">
                 <RadioButton x:Name="rbLocationBottomRight" Content="Bottom Right" GroupName="Location" />
                 <RadioButton x:Name="rbLocationBottomLeft" Content="Bottom Left" GroupName="Location" />
@@ -34,7 +56,7 @@
                 <RadioButton x:Name="rbLocationTopRight" Content="Top Right" GroupName="Location" />
             </StackPanel>
 
-            <TextBlock Text="Time Format" FontWeight="Bold" Margin="0,8,0,0" />
+            <TextBlock Text="Time Format" Style="{StaticResource SectionHeader}" Margin="0,8,0,0" />
             <StackPanel Orientation="Horizontal" Margin="0,6">
                 <RadioButton x:Name="rbTime12" Content="12 hs." GroupName="TimeFormat" Margin="0,0,8,0" />
                 <RadioButton x:Name="rbTime24" Content="24 hs." GroupName="TimeFormat" />
