@@ -6,7 +6,7 @@ namespace Ketch
 {
     public partial class SettingsWindow : Window
     {
-        public SettingsModel Result { get; private set; }
+        public SettingsModel? Result { get; private set; }
         private readonly SettingsModel _working;
 
         public SettingsWindow(SettingsModel current)

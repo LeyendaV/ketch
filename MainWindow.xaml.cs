@@ -2,10 +2,11 @@ using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Threading;
+using WF = System.Windows.Forms;
+using WMedia = System.Windows.Media;
+using W = System.Windows;
 
 namespace Ketch
 {
@@ -16,7 +17,7 @@ namespace Ketch
         private TrayIconManager _tray;
         private string _settingsPath;
 
-        public System.Windows.Media.Brush BackgroundBrush
+        public WMedia.Brush BackgroundBrush
         {
             get => RootBorder.Background;
             set => RootBorder.Background = value;
@@ -60,20 +61,21 @@ namespace Ketch
         {
             if (_settings.Background == "Transparent")
             {
-                BackgroundBrush = Brushes.Transparent;
+                BackgroundBrush = WMedia.Brushes.Transparent;
                 AllowsTransparency = true;
             }
             else
             {
-                BackgroundBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_settings.BackgroundHex));
+                BackgroundBrush = new WMedia.SolidColorBrush((WMedia.Color)WMedia.ColorConverter.ConvertFromString(_settings.BackgroundHex));
                 AllowsTransparency = true;
             }
 
             Opacity = _settings.Opacity / 100.0;
 
-            var screen = Screen.PrimaryScreen ?? Screen.AllScreens[0];
-            var dpi = VisualTreeHelper.GetDpi(this);
+            var screen = WF.Screen.PrimaryScreen ?? WF.Screen.AllScreens[0];
+            var dpi = WMedia.VisualTreeHelper.GetDpi(this);
             var displayHeight = screen.Bounds.Height;
+
             double h = displayHeight * (_settings.Size switch
             {
                 "Huge" => 0.50,
@@ -123,13 +125,11 @@ namespace Ketch
             ClockGrid.ColumnDefinitions.Clear();
 
             int cols = _settings.ShowSeconds ? 5 : 3;
+
             for (int i = 0; i < cols; i++)
             {
                 ClockGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             }
-
-            var hourAlign = _settings.ShowSeconds ? HorizontalAlignment.Right : HorizontalAlignment.Right;
-            var minuteAlign = _settings.ShowSeconds ? HorizontalAlignment.Left : HorizontalAlignment.Left;
 
             for (int i = 0; i < cols; i++)
             {
@@ -137,27 +137,27 @@ namespace Ketch
                 var tb = new TextBlock
                 {
                     Text = string.Empty,
-                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_settings.FontHex)),
+                    Foreground = new WMedia.SolidColorBrush((WMedia.Color)WMedia.ColorConverter.ConvertFromString(_settings.FontHex)),
                     FontSize = 72,
                     FontFamily = GetClockFontFamily(),
                     TextAlignment = TextAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    HorizontalAlignment = W.HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Center
                 };
 
                 if (_settings.ShowSeconds)
                 {
-                    if (i == 0) tb.HorizontalAlignment = HorizontalAlignment.Right;
-                    if (i == 1) tb.HorizontalAlignment = HorizontalAlignment.Center;
-                    if (i == 2) tb.HorizontalAlignment = HorizontalAlignment.Left;
-                    if (i == 3) tb.HorizontalAlignment = HorizontalAlignment.Center;
-                    if (i == 4) tb.HorizontalAlignment = HorizontalAlignment.Left;
+                    if (i == 0) tb.HorizontalAlignment = W.HorizontalAlignment.Right;
+                    if (i == 1) tb.HorizontalAlignment = W.HorizontalAlignment.Center;
+                    if (i == 2) tb.HorizontalAlignment = W.HorizontalAlignment.Left;
+                    if (i == 3) tb.HorizontalAlignment = W.HorizontalAlignment.Center;
+                    if (i == 4) tb.HorizontalAlignment = W.HorizontalAlignment.Left;
                 }
                 else
                 {
-                    if (i == 0) tb.HorizontalAlignment = HorizontalAlignment.Right;
-                    if (i == 1) tb.HorizontalAlignment = HorizontalAlignment.Center;
-                    if (i == 2) tb.HorizontalAlignment = HorizontalAlignment.Left;
+                    if (i == 0) tb.HorizontalAlignment = W.HorizontalAlignment.Right;
+                    if (i == 1) tb.HorizontalAlignment = W.HorizontalAlignment.Center;
+                    if (i == 2) tb.HorizontalAlignment = W.HorizontalAlignment.Left;
                 }
 
                 vb.Child = tb;
@@ -166,15 +166,15 @@ namespace Ketch
             }
         }
 
-        private static System.Windows.Media.FontFamily GetClockFontFamily()
+        private static WMedia.FontFamily GetClockFontFamily()
         {
             try
             {
-                return new System.Windows.Media.FontFamily(new Uri("pack://application:,,,/"), "./Assets/#Poketch Clock Numeral");
+                return new WMedia.FontFamily(new Uri("pack://application:,,,/"), "./Assets/#Poketch Clock Numeral");
             }
             catch
             {
-                return new System.Windows.Media.FontFamily("Segoe UI");
+                return new WMedia.FontFamily("Segoe UI");
             }
         }
 
@@ -209,7 +209,7 @@ namespace Ketch
 
         private void OpenSettings()
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 var window = new SettingsWindow(_settings);
                 if (window.ShowDialog() == true)
@@ -223,7 +223,7 @@ namespace Ketch
 
         private void OpenAbout()
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 var about = new AboutWindow();
                 about.Owner = this;
@@ -233,10 +233,10 @@ namespace Ketch
 
         private void ExitApp()
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 _tray.Dispose();
-                Application.Current.Shutdown();
+                System.Windows.Application.Current.Shutdown();
             });
         }
     }
