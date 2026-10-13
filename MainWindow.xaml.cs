@@ -255,8 +255,7 @@ namespace Ketch
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 var window = new SettingsWindow(_settings);
-                window.Owner = this;
-                window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                // Do not set Owner so the Settings window centers on the screen instead of following this window
                 window.Show();
             });
         }

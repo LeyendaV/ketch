@@ -11,6 +11,7 @@ namespace Ketch
         private readonly Action _openAbout;
         private readonly Action _exit;
         private readonly string _iconPath;
+        private ContextMenuStrip? _menu;
 
         public TrayIconManager(Action openSettings, Action openAbout, Action exit, string iconPath)
         {
@@ -35,6 +36,27 @@ namespace Ketch
             // Set the tooltip text shown on hover
             _notify.Text = "ketch clock";
 
+            // Create a persistent context menu and attach it to the NotifyIcon so that clicking outside closes it normally
+            _menu = new ContextMenuStrip();
+            var settingsItem = new ToolStripMenuItem("Settings");
+            settingsItem.Click += (_, _) => _openSettings?.Invoke();
+
+            var aboutItem = new ToolStripMenuItem("About");
+            aboutItem.Click += (_, _) => _openAbout?.Invoke();
+
+            var exitItem = new ToolStripMenuItem("Exit");
+            exitItem.Click += (_, _) => _exit?.Invoke();
+
+            _menu.Items.AddRange(new ToolStripItem[]
+            {
+                settingsItem,
+                aboutItem,
+                new ToolStripSeparator(),
+                exitItem
+            });
+
+            _notify.ContextMenuStrip = _menu;
+
             _notify.Visible = true;
             _notify.MouseClick += Notify_MouseClick;
             _notify.MouseDoubleClick += Notify_MouseDoubleClick;
@@ -52,42 +74,15 @@ namespace Ketch
         {
             if (e.Button == MouseButtons.Right)
             {
-                var menu = new ContextMenuStrip();
-                var settingsItem = new ToolStripMenuItem("Settings");
-                settingsItem.Click += (_, _) => _openSettings?.Invoke();
-
-                var aboutItem = new ToolStripMenuItem("About");
-                aboutItem.Click += (_, _) => _openAbout?.Invoke();
-
-                var exitItem = new ToolStripMenuItem("Exit");
-                exitItem.Click += (_, _) => _exit?.Invoke();
-
-                menu.Items.AddRange(new ToolStripItem[]
-                {
-                    settingsItem,
-                    aboutItem,
-                    new ToolStripSeparator(),
-                    exitItem
-                });
-
-                // Dispose the menu asynchronously after it closes to avoid disposing while WinForms processes click events.
-                menu.Closed += (s, ev) =>
-                {
-                    try
-                    {
-                        // BeginInvoke schedules disposal after current WinForms events finish.
-                        menu.BeginInvoke(new Action(() => { try { menu.Dispose(); } catch { } }));
-                    }
-                    catch { }
-                };
-
-                menu.Show(Cursor.Position);
+                // Show the persistent context menu; Windows will handle closing it when the user clicks outside
+                _menu?.Show(Cursor.Position);
             }
         }
 
         public void Dispose()
         {
             _notify.Visible = false;
+            try { _menu?.Dispose(); } catch { }
             _notify.Dispose();
         }
     }
