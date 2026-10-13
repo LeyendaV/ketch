@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace Ketch
@@ -8,6 +9,8 @@ namespace Ketch
     {
         public SettingsModel? Result { get; private set; }
         private readonly SettingsModel _working;
+        private readonly List<(string name, string hex)> _backgrounds;
+        private readonly List<(string name, string hex)> _fontColors;
 
         public SettingsWindow(SettingsModel current)
         {
@@ -26,7 +29,7 @@ namespace Ketch
                 ShowSeconds = current.ShowSeconds
             };
 
-            var backgrounds = new List<(string name, string hex)>
+            _backgrounds = new List<(string name, string hex)>
             {
                 ("Green", "#70B070"),
                 ("Yellow", "#B8B070"),
@@ -38,13 +41,14 @@ namespace Ketch
                 ("Grey", "#A0A0A0"),
                 ("Transparent", "#00000000")
             };
-            cbBackground.ItemsSource = backgrounds;
-            cbBackground.DisplayMemberPath = "name";
-            cbBackground.SelectedIndex = backgrounds.FindIndex(item => item.name == _working.Background);
-            if (cbBackground.SelectedIndex < 0) cbBackground.SelectedIndex = 0;
 
-            var fonts = new List<(string name, string hex)>
+            cbBackground.ItemsSource = _backgrounds.Select(b => b.name).ToList();
+            cbBackground.SelectedIndex = Math.Max(0, _backgrounds.FindIndex(item => item.name == _working.Background));
+
+            _fontColors = new List<(string name, string hex)>
             {
+                ("Black", "#000000"),
+                ("White", "#FFFFFF"),
                 ("Green", "#385030"),
                 ("Yellow", "#485030"),
                 ("Orange", "#504028"),
@@ -54,43 +58,63 @@ namespace Ketch
                 ("Teal", "#105860"),
                 ("Grey", "#505050")
             };
-            cbFont.ItemsSource = fonts;
-            cbFont.DisplayMemberPath = "name";
-            cbFont.SelectedIndex = fonts.FindIndex(item => item.name == _working.Font);
-            if (cbFont.SelectedIndex < 0) cbFont.SelectedIndex = 0;
 
-            var opacities = new List<int> { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
-            cbOpacity.ItemsSource = opacities;
-            cbOpacity.SelectedItem = _working.Opacity;
+            cbFont.ItemsSource = _fontColors.Select(f => f.name).ToList();
+            cbFont.SelectedIndex = Math.Max(0, _fontColors.FindIndex(item => item.name == _working.Font));
 
-            var sizes = new List<string> { "Huge", "Big", "Medium", "Small" };
-            cbSize.ItemsSource = sizes;
-            cbSize.SelectedItem = _working.Size;
+            sliderOpacity.Value = _working.Opacity;
+            tbOpacityValue.Text = _working.Opacity.ToString();
+            sliderOpacity.ValueChanged += (s, e) => tbOpacityValue.Text = ((int)sliderOpacity.Value).ToString();
 
-            var locations = new List<string> { "Bottom Right", "Bottom Left", "Top Left", "Top Right" };
-            cbLocation.ItemsSource = locations;
-            cbLocation.SelectedItem = _working.DisplayLocation;
+            // Size radio buttons
+            switch (_working.Size)
+            {
+                case "Huge": rbSizeHuge.IsChecked = true; break;
+                case "Big": rbSizeBig.IsChecked = true; break;
+                case "Medium": rbSizeMedium.IsChecked = true; break;
+                default: rbSizeSmall.IsChecked = true; break;
+            }
 
-            var formats = new List<string> { "12 hs.", "24 hs." };
-            cbTimeFormat.ItemsSource = formats;
-            cbTimeFormat.SelectedItem = _working.TimeFormat;
+            // Display location
+            switch (_working.DisplayLocation)
+            {
+                case "Bottom Right": rbLocationBottomRight.IsChecked = true; break;
+                case "Bottom Left": rbLocationBottomLeft.IsChecked = true; break;
+                case "Top Left": rbLocationTopLeft.IsChecked = true; break;
+                default: rbLocationTopRight.IsChecked = true; break;
+            }
+
+            // Time format
+            if (_working.TimeFormat == "12 hs.") rbTime12.IsChecked = true; else rbTime24.IsChecked = true;
 
             chkSeconds.IsChecked = _working.ShowSeconds;
         }
 
         private void BtnOk_Click(object sender, RoutedEventArgs e)
         {
-            var bg = ((string name, string hex))cbBackground.SelectedItem;
-            var ft = ((string name, string hex))cbFont.SelectedItem;
+            var bgName = cbBackground.SelectedItem as string ?? _backgrounds[0].name;
+            var bg = _backgrounds.First(b => b.name == bgName);
+
+            var ftName = cbFont.SelectedItem as string ?? _fontColors[0].name;
+            var ft = _fontColors.First(f => f.name == ftName);
 
             _working.Background = bg.name;
             _working.BackgroundHex = bg.hex;
             _working.Font = ft.name;
             _working.FontHex = ft.hex;
-            _working.Opacity = (int)cbOpacity.SelectedItem;
-            _working.Size = (string)cbSize.SelectedItem;
-            _working.DisplayLocation = (string)cbLocation.SelectedItem;
-            _working.TimeFormat = (string)cbTimeFormat.SelectedItem;
+            _working.Opacity = (int)sliderOpacity.Value;
+
+            if (rbSizeHuge.IsChecked == true) _working.Size = "Huge";
+            else if (rbSizeBig.IsChecked == true) _working.Size = "Big";
+            else if (rbSizeMedium.IsChecked == true) _working.Size = "Medium";
+            else _working.Size = "Small";
+
+            if (rbLocationBottomRight.IsChecked == true) _working.DisplayLocation = "Bottom Right";
+            else if (rbLocationBottomLeft.IsChecked == true) _working.DisplayLocation = "Bottom Left";
+            else if (rbLocationTopLeft.IsChecked == true) _working.DisplayLocation = "Top Left";
+            else _working.DisplayLocation = "Top Right";
+
+            _working.TimeFormat = (rbTime12.IsChecked == true) ? "12 hs." : "24 hs.";
             _working.ShowSeconds = chkSeconds.IsChecked == true;
 
             Result = _working;
