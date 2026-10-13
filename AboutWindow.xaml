@@ -6,7 +6,7 @@
         WindowStyle="None" AllowsTransparency="True" Background="#22242a" ShowInTaskbar="False">
     <Border Background="#22242a" Padding="12">
         <StackPanel>
-            <TextBlock Text="Version 1.0.0 (October 2026)" Margin="0,4" Foreground="#bac6e8" />
+            <TextBlock Text="ketch — Version 1.0.0 (October 2026)" Margin="0,4" Foreground="#bac6e8" />
             <TextBlock Text="Developed by LeyendaV. Clock Font by CrazyMatt." Margin="0,4" Foreground="#bac6e8" />
             <TextBlock Margin="0,4">
                 <Hyperlink NavigateUri="https://github.com/LeyendaV/ketch" RequestNavigate="Hyperlink_RequestNavigate" Foreground="#7aacff">https://github.com/LeyendaV/ketch</Hyperlink>
