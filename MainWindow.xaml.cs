@@ -151,14 +151,14 @@ namespace Ketch
 
             int cols = _settings.ShowSeconds ? 5 : 3;
 
-            // Load font and choose a large base size for measurement. The outer Viewbox will scale uniformly to fit.
+            // Load font and choose a moderate base size for measurement.
             var fontFamily = TryLoadFontFamilyFromAssets() ?? new WMedia.FontFamily("Segoe UI");
-            double baseFontSize = 400;
+            double baseFontSize = 200.0; // moderate size for reliable measurement
 
-            // Measure widest glyph among digits and colon so each column uses the same minimum width/height.
+            // Measure digits and colon
             double maxGlyphWidth = 0;
             double maxGlyphHeight = 0;
-            var toMeasure = new[] { "0","1","2","3","4","5","6","7","8","9",":" };
+            var toMeasure = new[] { "0","1","2","3","4","5","6","7","8","9", ":" };
             foreach (var ch in toMeasure)
             {
                 var meas = new TextBlock
@@ -168,26 +168,33 @@ namespace Ketch
                     FontSize = baseFontSize,
                     FontStretch = FontStretches.Normal,
                     FontStyle = FontStyles.Normal,
-                    FontWeight = FontWeights.Normal
+                    FontWeight = FontWeights.Normal,
+                    TextWrapping = TextWrapping.NoWrap
                 };
-                // Qualify Size with W to avoid ambiguity with System.Drawing.Size
+
                 meas.Measure(new W.Size(double.PositiveInfinity, double.PositiveInfinity));
-                if (meas.DesiredSize.Width > maxGlyphWidth) maxGlyphWidth = meas.DesiredSize.Width;
-                if (meas.DesiredSize.Height > maxGlyphHeight) maxGlyphHeight = meas.DesiredSize.Height;
+                maxGlyphWidth = Math.Max(maxGlyphWidth, meas.DesiredSize.Width);
+                maxGlyphHeight = Math.Max(maxGlyphHeight, meas.DesiredSize.Height);
             }
 
-            // Create inner grid with STAR columns but set MinWidth so they don't shrink below the glyph size.
-            var inner = new Grid();
+            // Padding so glyphs don't touch edges
+            const double paddingFactor = 0.10; // 10%
+            const double paddingPixels = 6.0;
+            double colWidth = maxGlyphWidth * (1.0 + paddingFactor) + paddingPixels;
+            double rowHeight = maxGlyphHeight * (1.0 + paddingFactor) + paddingPixels;
+
+            // Build inner grid with FIXED pixel column widths and explicit Width/Height
+            var inner = new Grid
+            {
+                Width = colWidth * cols,
+                Height = rowHeight
+            };
+
             for (int i = 0; i < cols; i++)
             {
-                var col = new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) };
-                col.MinWidth = maxGlyphWidth;
-                inner.ColumnDefinitions.Add(col);
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colWidth, GridUnitType.Pixel) });
             }
-            // Single row; use Auto height but set MinHeight so it won't shrink when small glyphs appear
-            var row = new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) };
-            row.MinHeight = maxGlyphHeight;
-            inner.RowDefinitions.Add(row);
+            inner.RowDefinitions.Add(new RowDefinition { Height = new GridLength(rowHeight, GridUnitType.Pixel) });
 
             for (int i = 0; i < cols; i++)
             {
@@ -203,7 +210,7 @@ namespace Ketch
                     TextWrapping = TextWrapping.NoWrap
                 };
 
-                // Preserve alignment intent per column
+                // Column visual alignment intent
                 if (_settings.ShowSeconds)
                 {
                     if (i == 0) { tb.TextAlignment = TextAlignment.Right; tb.HorizontalAlignment = W.HorizontalAlignment.Right; }
@@ -224,7 +231,15 @@ namespace Ketch
                 inner.Children.Add(tb);
             }
 
-            var outer = new Viewbox { Child = inner, Stretch = WMedia.Stretch.Uniform, StretchDirection = StretchDirection.Both, HorizontalAlignment = W.HorizontalAlignment.Stretch, VerticalAlignment = W.VerticalAlignment.Stretch };
+            var outer = new Viewbox
+            {
+                Child = inner,
+                Stretch = WMedia.Stretch.Uniform,
+                StretchDirection = StretchDirection.Both,
+                HorizontalAlignment = W.HorizontalAlignment.Stretch,
+                VerticalAlignment = W.VerticalAlignment.Stretch
+            };
+
             ClockGrid.Children.Add(outer);
         }
 
