@@ -155,7 +155,7 @@ namespace Ketch
             var fontFamily = TryLoadFontFamilyFromAssets() ?? new WMedia.FontFamily("Segoe UI");
             double baseFontSize = 400;
 
-            // Measure widest glyph among digits and colon so each column uses the same fixed width and height.
+            // Measure widest glyph among digits and colon so each column uses the same minimum width/height.
             double maxGlyphWidth = 0;
             double maxGlyphHeight = 0;
             var toMeasure = new[] { "0","1","2","3","4","5","6","7","8","9",":" };
@@ -176,13 +176,18 @@ namespace Ketch
                 if (meas.DesiredSize.Height > maxGlyphHeight) maxGlyphHeight = meas.DesiredSize.Height;
             }
 
-            // Create inner grid with fixed pixel column widths (equal for every column) and a single fixed row height.
+            // Create inner grid with STAR columns but set MinWidth so they don't shrink below the glyph size.
             var inner = new Grid();
             for (int i = 0; i < cols; i++)
             {
-                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(maxGlyphWidth, GridUnitType.Pixel) });
+                var col = new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) };
+                col.MinWidth = maxGlyphWidth;
+                inner.ColumnDefinitions.Add(col);
             }
-            inner.RowDefinitions.Add(new RowDefinition { Height = new GridLength(maxGlyphHeight, GridUnitType.Pixel) });
+            // Single row; use Auto height but set MinHeight so it won't shrink when small glyphs appear
+            var row = new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) };
+            row.MinHeight = maxGlyphHeight;
+            inner.RowDefinitions.Add(row);
 
             for (int i = 0; i < cols; i++)
             {
@@ -195,8 +200,7 @@ namespace Ketch
                     TextAlignment = TextAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = W.HorizontalAlignment.Center,
-                    Width = maxGlyphWidth,
-                    Height = maxGlyphHeight
+                    TextWrapping = TextWrapping.NoWrap
                 };
 
                 // Preserve alignment intent per column
@@ -220,7 +224,7 @@ namespace Ketch
                 inner.Children.Add(tb);
             }
 
-            var outer = new Viewbox { Child = inner, Stretch = WMedia.Stretch.Uniform };
+            var outer = new Viewbox { Child = inner, Stretch = WMedia.Stretch.Uniform, StretchDirection = StretchDirection.Both, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
             ClockGrid.Children.Add(outer);
         }
 
