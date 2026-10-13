@@ -155,8 +155,9 @@ namespace Ketch
             var fontFamily = TryLoadFontFamilyFromAssets() ?? new WMedia.FontFamily("Segoe UI");
             double baseFontSize = 400;
 
-            // Measure widest glyph among digits and colon so each column uses the same fixed width.
+            // Measure widest glyph among digits and colon so each column uses the same fixed width and height.
             double maxGlyphWidth = 0;
+            double maxGlyphHeight = 0;
             var toMeasure = new[] { "0","1","2","3","4","5","6","7","8","9",":" };
             foreach (var ch in toMeasure)
             {
@@ -171,14 +172,16 @@ namespace Ketch
                 };
                 meas.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                 if (meas.DesiredSize.Width > maxGlyphWidth) maxGlyphWidth = meas.DesiredSize.Width;
+                if (meas.DesiredSize.Height > maxGlyphHeight) maxGlyphHeight = meas.DesiredSize.Height;
             }
 
-            // Create inner grid with fixed pixel column widths (equal for every column).
+            // Create inner grid with fixed pixel column widths (equal for every column) and a single fixed row height.
             var inner = new Grid();
             for (int i = 0; i < cols; i++)
             {
                 inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(maxGlyphWidth, GridUnitType.Pixel) });
             }
+            inner.RowDefinitions.Add(new RowDefinition { Height = new GridLength(maxGlyphHeight, GridUnitType.Pixel) });
 
             for (int i = 0; i < cols; i++)
             {
@@ -191,7 +194,8 @@ namespace Ketch
                     TextAlignment = TextAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = W.HorizontalAlignment.Center,
-                    Width = maxGlyphWidth
+                    Width = maxGlyphWidth,
+                    Height = maxGlyphHeight
                 };
 
                 // Preserve alignment intent per column
@@ -211,6 +215,7 @@ namespace Ketch
                 }
 
                 Grid.SetColumn(tb, i);
+                Grid.SetRow(tb, 0);
                 inner.Children.Add(tb);
             }
 
@@ -315,73 +320,6 @@ namespace Ketch
                     ((TextBlock)inner.Children[4]).Text = second;
                 }
             }
-        }
-
-        private WMedia.FontFamily? TryLoadFontFamilyFromAssets()
-        {
-            // 1) Try to load directly from the font file in the output Assets folder (site of origin). This does not require installing the font.
-            try
-            {
-                var fontFile = Path.Combine(AppContext.BaseDirectory, "Assets", "ketch_font.ttf");
-                if (File.Exists(fontFile))
-                {
-                    // Use GlyphTypeface to read the internal family name from the TTF
-                    var glyph = new WMedia.GlyphTypeface(new Uri(fontFile));
-
-                    // Pick a suitable family name (prefer current UI culture, then en-US, then first)
-                    string familyName = null!;
-                    if (glyph.FamilyNames.TryGetValue(CultureInfo.CurrentUICulture, out var name)) familyName = name;
-                    else if (glyph.FamilyNames.TryGetValue(new CultureInfo("en-US"), out name)) familyName = name;
-                    else familyName = glyph.FamilyNames.Values.FirstOrDefault() ?? "Poketch Clock Numeral";
-
-                    // Create a FontFamily that points to the local font file directory and the internal family name
-                    var folder = Path.GetDirectoryName(fontFile)!;
-                    var folderUri = new Uri(folder.EndsWith("/") || folder.EndsWith("\\") ? folder : folder + Path.DirectorySeparatorChar);
-
-                    try
-                    {
-                        return new WMedia.FontFamily(folderUri, $"./#{familyName}");
-                    }
-                    catch { }
-
-                    // Last resort: try siteoforigin pack URI with the discovered family name
-                    try
-                    {
-                        return new WMedia.FontFamily(new Uri("pack://siteoforigin:,,,/"), $"./Assets/#{familyName}");
-                    }
-                    catch { }
-                }
-            }
-            catch { }
-
-            // 2) Try to enumerate fonts from site-of-origin Assets folder
-            try
-            {
-                var siteUri = new Uri("pack://siteoforigin:,,,/Assets/");
-                var families = WMedia.Fonts.GetFontFamilies(siteUri, "./");
-                foreach (var f in families)
-                {
-                    if (f.Source.IndexOf("Poketch", StringComparison.OrdinalIgnoreCase) >= 0 || f.Source.IndexOf("ketch", StringComparison.OrdinalIgnoreCase) >= 0)
-                        return f;
-                }
-            }
-            catch { }
-
-            // 3) Try application resources (embedded resource)
-            try
-            {
-                var appUri = new Uri("pack://application:,,,/Assets/");
-                var families = WMedia.Fonts.GetFontFamilies(appUri, "./");
-                foreach (var f in families)
-                {
-                    if (f.Source.IndexOf("Poketch", StringComparison.OrdinalIgnoreCase) >= 0 || f.Source.IndexOf("ketch", StringComparison.OrdinalIgnoreCase) >= 0)
-                        return f;
-                }
-            }
-            catch { }
-
-            // Not found
-            return null;
         }
 
         private void OpenSettings()
