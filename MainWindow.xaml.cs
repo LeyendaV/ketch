@@ -166,15 +166,15 @@ namespace Ketch
             }
         }
 
-        private static FontFamily GetClockFontFamily()
+        private static System.Windows.Media.FontFamily GetClockFontFamily()
         {
             try
             {
-                return new FontFamily(new Uri("pack://application:,,,/"), "./Assets/#Poketch Clock Numeral");
+                return new System.Windows.Media.FontFamily(new Uri("pack://application:,,,/"), "./Assets/#Poketch Clock Numeral");
             }
             catch
             {
-                return new FontFamily("Segoe UI");
+                return new System.Windows.Media.FontFamily("Segoe UI");
             }
         }
 
