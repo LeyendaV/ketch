@@ -1,3 +1,9 @@
+name: Build and release ketch
+
+on: workflow_dispatch: push: tags: - 'v*'
+
+jobs: build-and-release: runs-on: windows-latest
+
 steps:
   - name: Checkout
     uses: actions/checkout@v4
