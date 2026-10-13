@@ -2,16 +2,17 @@
 <Window x:Class="Ketch.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Settings" Height="480" Width="380" WindowStartupLocation="CenterOwner"
+        Title="Settings" Height="480" Width="380" WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
         WindowStyle="None" AllowsTransparency="True" Background="#22242a" ShowInTaskbar="False">
     <Window.Resources>
         <Style TargetType="ComboBox">
-            <Setter Property="Foreground" Value="#bac6e8" />
-            <Setter Property="Background" Value="#22242a" />
+            <Setter Property="Foreground" Value="#22242a" />
+            <Setter Property="Background" Value="#bac6e8" />
+            <Setter Property="BorderBrush" Value="#bac6e8" />
         </Style>
         <Style TargetType="ComboBoxItem">
-            <Setter Property="Foreground" Value="#bac6e8" />
-            <Setter Property="Background" Value="#22242a" />
+            <Setter Property="Foreground" Value="#22242a" />
+            <Setter Property="Background" Value="#bac6e8" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
         </Style>
         <Style TargetType="RadioButton">
