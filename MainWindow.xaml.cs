@@ -153,17 +153,16 @@ namespace Ketch
 
             // Load font and choose a moderate base size for measurement.
             var fontFamily = TryLoadFontFamilyFromAssets() ?? new WMedia.FontFamily("Segoe UI");
-            double baseFontSize = 200.0; // moderate size for reliable measurement
+            double baseFontSize = 220.0; // moderate size for reliable measurement
 
-            // Measure digits and colon
-            double maxGlyphWidth = 0;
-            double maxGlyphHeight = 0;
-            var toMeasure = new[] { "0","1","2","3","4","5","6","7","8","9", ":" };
-            foreach (var ch in toMeasure)
+            // Measure the glyph '0' (we'll size columns based on that)
+            double glyph0Width = 0;
+            double glyph0Height = 0;
+            try
             {
                 var meas = new TextBlock
                 {
-                    Text = ch,
+                    Text = "0",
                     FontFamily = fontFamily,
                     FontSize = baseFontSize,
                     FontStretch = FontStretches.Normal,
@@ -171,31 +170,52 @@ namespace Ketch
                     FontWeight = FontWeights.Normal,
                     TextWrapping = TextWrapping.NoWrap
                 };
-
                 meas.Measure(new W.Size(double.PositiveInfinity, double.PositiveInfinity));
-                maxGlyphWidth = Math.Max(maxGlyphWidth, meas.DesiredSize.Width);
-                maxGlyphHeight = Math.Max(maxGlyphHeight, meas.DesiredSize.Height);
+                glyph0Width = meas.DesiredSize.Width;
+                glyph0Height = meas.DesiredSize.Height;
+            }
+            catch
+            {
+                // fallback
+                glyph0Width = 40;
+                glyph0Height = 80;
             }
 
-            // Padding so glyphs don't touch edges
-            const double paddingFactor = 0.10; // 10%
-            const double paddingPixels = 6.0;
-            double colWidth = maxGlyphWidth * (1.0 + paddingFactor) + paddingPixels;
-            double rowHeight = maxGlyphHeight * (1.0 + paddingFactor) + paddingPixels;
+            // padding to avoid clipping
+            const double paddingPixels = 8.0;
+
+            double colonWidth = glyph0Width + paddingPixels; // colon columns = one '0' width
+            double digitColumnWidth = glyph0Width * 2 + paddingPixels; // hour/min/sec columns = two '0' widths
+            double rowHeight = glyph0Height + paddingPixels; // row height = '0' height
 
             // Build inner grid with FIXED pixel column widths and explicit Width/Height
             var inner = new Grid
             {
-                Width = colWidth * cols,
+                Width = (cols == 5)
+                    ? (digitColumnWidth + colonWidth + digitColumnWidth + colonWidth + digitColumnWidth)
+                    : (digitColumnWidth + colonWidth + digitColumnWidth),
                 Height = rowHeight
             };
 
-            for (int i = 0; i < cols; i++)
+            // Add column definitions matching desired widths
+            if (cols == 5)
             {
-                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colWidth, GridUnitType.Pixel) });
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(digitColumnWidth, GridUnitType.Pixel) });
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colonWidth, GridUnitType.Pixel) });
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(digitColumnWidth, GridUnitType.Pixel) });
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colonWidth, GridUnitType.Pixel) });
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(digitColumnWidth, GridUnitType.Pixel) });
             }
+            else
+            {
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(digitColumnWidth, GridUnitType.Pixel) });
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colonWidth, GridUnitType.Pixel) });
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(digitColumnWidth, GridUnitType.Pixel) });
+            }
+
             inner.RowDefinitions.Add(new RowDefinition { Height = new GridLength(rowHeight, GridUnitType.Pixel) });
 
+            // Create TextBlocks for each column
             for (int i = 0; i < cols; i++)
             {
                 var tb = new TextBlock
