@@ -170,7 +170,8 @@ namespace Ketch
                     FontStyle = FontStyles.Normal,
                     FontWeight = FontWeights.Normal
                 };
-                meas.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                // Qualify Size with W to avoid ambiguity with System.Drawing.Size
+                meas.Measure(new W.Size(double.PositiveInfinity, double.PositiveInfinity));
                 if (meas.DesiredSize.Width > maxGlyphWidth) maxGlyphWidth = meas.DesiredSize.Width;
                 if (meas.DesiredSize.Height > maxGlyphHeight) maxGlyphHeight = meas.DesiredSize.Height;
             }
