@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using System.Globalization;
 using WF = System.Windows.Forms;
 using WMedia = System.Windows.Media;
 using W = System.Windows;
@@ -155,6 +156,8 @@ namespace Ketch
                 ClockGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             }
 
+            var fontFamily = TryLoadFontFamilyFromAssets() ?? new WMedia.FontFamily("Segoe UI");
+
             for (int i = 0; i < cols; i++)
             {
                 var vb = new Viewbox { Stretch = WMedia.Stretch.Uniform, StretchDirection = StretchDirection.Both };
@@ -163,7 +166,7 @@ namespace Ketch
                     Text = string.Empty,
                     Foreground = new WMedia.SolidColorBrush((WMedia.Color)WMedia.ColorConverter.ConvertFromString(_settings.FontHex)),
                     FontSize = 72,
-                    FontFamily = GetClockFontFamily(),
+                    FontFamily = fontFamily,
                     TextAlignment = TextAlignment.Center,
                     HorizontalAlignment = W.HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Center
@@ -190,23 +193,44 @@ namespace Ketch
             }
         }
 
-        private static WMedia.FontFamily GetClockFontFamily()
+        private WMedia.FontFamily? TryLoadFontFamilyFromAssets()
         {
-            // Try to load font families from the application's Resources (pack URI) first. This works when the font file
-            // is embedded as a Resource (see ketch.csproj which includes Assets\ketch_font.ttf as a Resource).
+            // 1) Try to load directly from the font file in the output Assets folder (site of origin). This does not require installing the font.
             try
             {
-                var appUri = new Uri("pack://application:,,,/Assets/");
-                var families = WMedia.Fonts.GetFontFamilies(appUri, "./");
-                foreach (var f in families)
+                var fontFile = Path.Combine(AppContext.BaseDirectory, "Assets", "ketch_font.ttf");
+                if (File.Exists(fontFile))
                 {
-                    if (f.Source.IndexOf("Poketch", StringComparison.OrdinalIgnoreCase) >= 0 || f.Source.IndexOf("ketch", StringComparison.OrdinalIgnoreCase) >= 0)
-                        return f;
+                    // Use GlyphTypeface to read the internal family name from the TTF
+                    var glyph = new WMedia.GlyphTypeface(new Uri(fontFile));
+
+                    // Pick a suitable family name (prefer current UI culture, then en-US, then first)
+                    string familyName = null!;
+                    if (glyph.FamilyNames.TryGetValue(CultureInfo.CurrentUICulture, out var name)) familyName = name;
+                    else if (glyph.FamilyNames.TryGetValue(new CultureInfo("en-US"), out name)) familyName = name;
+                    else familyName = glyph.FamilyNames.Values.FirstOrDefault() ?? "Poketch Clock Numeral";
+
+                    // Create a FontFamily that points to the local font file directory and the internal family name
+                    var folder = Path.GetDirectoryName(fontFile)!;
+                    var folderUri = new Uri(folder.EndsWith("/") || folder.EndsWith("\\") ? folder : folder + Path.DirectorySeparatorChar);
+
+                    try
+                    {
+                        return new WMedia.FontFamily(folderUri, $"./#{familyName}");
+                    }
+                    catch { }
+
+                    // Last resort: try siteoforigin pack URI with the discovered family name
+                    try
+                    {
+                        return new WMedia.FontFamily(new Uri("pack://siteoforigin:,,,/"), $"./Assets/#{familyName}");
+                    }
+                    catch { }
                 }
             }
             catch { }
 
-            // If not found, try site of origin (if the font is copied to output directory).
+            // 2) Try to enumerate fonts from site-of-origin Assets folder
             try
             {
                 var siteUri = new Uri("pack://siteoforigin:,,,/Assets/");
@@ -219,15 +243,21 @@ namespace Ketch
             }
             catch { }
 
-            // As a last resort, return a FontFamily using a direct pack URI with the internal family name we expect.
+            // 3) Try application resources (embedded resource)
             try
             {
-                return new WMedia.FontFamily(new Uri("pack://application:,,,/"), "./Assets/#Poketch Clock Numeral");
+                var appUri = new Uri("pack://application:,,,/Assets/");
+                var families = WMedia.Fonts.GetFontFamilies(appUri, "./");
+                foreach (var f in families)
+                {
+                    if (f.Source.IndexOf("Poketch", StringComparison.OrdinalIgnoreCase) >= 0 || f.Source.IndexOf("ketch", StringComparison.OrdinalIgnoreCase) >= 0)
+                        return f;
+                }
             }
             catch { }
 
-            // Fallback to a system font
-            return new WMedia.FontFamily("Segoe UI");
+            // Not found
+            return null;
         }
 
         private void UpdateClock()
