@@ -3,7 +3,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="About" Height="140" Width="420" WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        WindowStyle="None" AllowsTransparency="True" Background="#22242a" ShowInTaskbar="False" AllowsTransparency="True">
+        WindowStyle="None" AllowsTransparency="True" Background="#22242a" ShowInTaskbar="False">
     <Border Background="#22242a" Padding="12">
         <StackPanel>
             <TextBlock Text="Version 1.0.0 (October 2026)" Margin="0,4" Foreground="#bac6e8" />
