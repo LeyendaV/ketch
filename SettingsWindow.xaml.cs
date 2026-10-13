@@ -108,7 +108,7 @@ namespace Ketch
             var bgName = cbBackground.SelectedItem as string ?? _backgrounds[0].name;
             var bg = _backgrounds.First(b => b.name == bgName);
 
-            var ftName = cbFont.SelectedItem as string ?? _fontColors[0].name;
+            var ftName = cbFont.SelectedItem as string ?? _font_colors[0].name;
             var ft = _fontColors.First(f => f.name == ftName);
 
             _working.Background = bg.name;
@@ -137,13 +137,13 @@ namespace Ketch
         private void ApplyToOwnerAndSave()
         {
             // Try to find a MainWindow to apply settings to. Prefer Owner, but fall back to the application's MainWindow or any live MainWindow.
-            var mw = this.Owner as MainWindow ?? Application.Current?.Windows.OfType<MainWindow>().FirstOrDefault();
+            var mw = this.Owner as MainWindow ?? System.Windows.Application.Current?.Windows.OfType<MainWindow>().FirstOrDefault();
 
             if (mw != null)
             {
                 try
                 {
-                    mw.ApplyNewSettings(_working);
+                    mw.Dispatcher.Invoke(() => mw.ApplyNewSettings(_working));
                 }
                 catch { }
             }
