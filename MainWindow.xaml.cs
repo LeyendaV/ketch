@@ -192,32 +192,41 @@ namespace Ketch
 
         private static WMedia.FontFamily GetClockFontFamily()
         {
-            var candidateNames = new[]
+            // Try to load font families from the application's Resources (pack URI) first. This works when the font file
+            // is embedded as a Resource (see ketch.csproj which includes Assets\ketch_font.ttf as a Resource).
+            try
             {
-                "Poketch Clock Numeral",
-                "Poketch Clock",
-                "Ketch Font",
-                "ketch_font",
-                "Ketch",
-                "Segoe UI"
-            };
-
-            foreach (var candidate in candidateNames)
-            {
-                foreach (var baseUri in new[]
+                var appUri = new Uri("pack://application:,,,/Assets/");
+                var families = WMedia.Fonts.GetFontFamilies(appUri, "./");
+                foreach (var f in families)
                 {
-                    new Uri("pack://application:,,,/"),
-                    new Uri("pack://siteoforigin:,,,/")
-                })
-                {
-                    try
-                    {
-                        return new WMedia.FontFamily(baseUri, $"./Assets/#{candidate}");
-                    }
-                    catch { }
+                    if (f.Source.IndexOf("Poketch", StringComparison.OrdinalIgnoreCase) >= 0 || f.Source.IndexOf("ketch", StringComparison.OrdinalIgnoreCase) >= 0)
+                        return f;
                 }
             }
+            catch { }
 
+            // If not found, try site of origin (if the font is copied to output directory).
+            try
+            {
+                var siteUri = new Uri("pack://siteoforigin:,,,/Assets/");
+                var families = WMedia.Fonts.GetFontFamilies(siteUri, "./");
+                foreach (var f in families)
+                {
+                    if (f.Source.IndexOf("Poketch", StringComparison.OrdinalIgnoreCase) >= 0 || f.Source.IndexOf("ketch", StringComparison.OrdinalIgnoreCase) >= 0)
+                        return f;
+                }
+            }
+            catch { }
+
+            // As a last resort, return a FontFamily using a direct pack URI with the internal family name we expect.
+            try
+            {
+                return new WMedia.FontFamily(new Uri("pack://application:,,,/"), "./Assets/#Poketch Clock Numeral");
+            }
+            catch { }
+
+            // Fallback to a system font
             return new WMedia.FontFamily("Segoe UI");
         }
 
