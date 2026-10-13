@@ -25,20 +25,36 @@ namespace Ketch
 
         public MainWindow()
         {
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
 
-            var loaded = SettingsModel.LoadWithAutoPath();
-            _settings = loaded.settings;
-            _settingsPath = loaded.path;
+                var loaded = SettingsModel.LoadWithAutoPath();
+                _settings = loaded.settings;
+                _settingsPath = loaded.path;
 
-            var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "ketch_icon.ico");
-            _tray = new TrayIconManager(OpenSettings, OpenAbout, ExitApp, iconPath);
-            _tray.Initialize();
+                var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "ketch_icon.ico");
+                _tray = new TrayIconManager(OpenSettings, OpenAbout, ExitApp, iconPath);
+                _tray.Initialize();
 
-            _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromMilliseconds(250);
-            _timer.Tick += (_, _) => UpdateClock();
-            _timer.Start();
+                _timer = new DispatcherTimer();
+                _timer.Interval = TimeSpan.FromMilliseconds(250);
+                _timer.Tick += (_, _) => UpdateClock();
+                _timer.Start();
+            }
+            catch (Exception ex)
+            {
+                // Log and show a friendly message, then exit
+                try
+                {
+                    var logPath = Path.Combine(AppContext.BaseDirectory, "ketch_error.log");
+                    File.AppendAllText(logPath, ex.ToString());
+                }
+                catch { }
+
+                MessageBox.Show("ketch failed to start. Please check ketch_error.log next to the executable or in %LOCALAPPDATA%\\ketch.", "ketch - Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Environment.Exit(1);
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
