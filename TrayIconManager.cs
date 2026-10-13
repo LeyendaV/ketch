@@ -32,6 +32,9 @@ namespace Ketch
                 _notify.Icon = SystemIcons.Application;
             }
 
+            // Set the tooltip text shown on hover
+            _notify.Text = "ketch clock";
+
             _notify.Visible = true;
             _notify.MouseClick += Notify_MouseClick;
             _notify.MouseDoubleClick += Notify_MouseDoubleClick;
