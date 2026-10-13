@@ -1,0 +1,12 @@
+<Window x:Class="Ketch.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About" Height="140" Width="420" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <StackPanel Margin="12">
+        <TextBlock Text="Version 1.0.0 (October 2026)" Margin="0,4" />
+        <TextBlock Text="Developed by LeyendaV. Clock font by CrazyMatt." Margin="0,4" />
+        <TextBlock Margin="0,4">
+            <Hyperlink NavigateUri="https://github.com/LeyendaV/ketch" RequestNavigate="Hyperlink_RequestNavigate">https://github.com/LeyendaV/ketch</Hyperlink>
+        </TextBlock>
+    </StackPanel>
+</Window>
