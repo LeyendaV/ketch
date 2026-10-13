@@ -33,6 +33,10 @@ namespace Ketch
                 _settings = loaded.settings;
                 _settingsPath = loaded.path;
 
+                // AllowsTransparency must be set before the window handle is created (before calling WindowInteropHelper.Handle).
+                // Set it early here, so later calls that obtain the HWND (for click-through) won't cause an InvalidOperationException.
+                AllowsTransparency = true;
+
                 var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "ketch_icon.ico");
                 _tray = new TrayIconManager(OpenSettings, OpenAbout, ExitApp, iconPath);
                 _tray.Initialize();
@@ -78,12 +82,12 @@ namespace Ketch
             if (_settings.Background == "Transparent")
             {
                 BackgroundBrush = WMedia.Brushes.Transparent;
-                AllowsTransparency = true;
+                // AllowsTransparency must not be changed after the window handle exists; set in constructor instead.
             }
             else
             {
                 BackgroundBrush = new WMedia.SolidColorBrush((WMedia.Color)WMedia.ColorConverter.ConvertFromString(_settings.BackgroundHex));
-                AllowsTransparency = true;
+                // AllowsTransparency must not be changed after the window handle exists; set in constructor instead.
             }
 
             Opacity = _settings.Opacity / 100.0;
