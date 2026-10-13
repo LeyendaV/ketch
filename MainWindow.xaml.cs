@@ -88,7 +88,8 @@ namespace Ketch
 
             var margin = 50;
             var work = screen.WorkingArea;
-            double left = 0, top = 0;
+            double left = 0;
+            double top = 0;
 
             switch (_settings.DisplayLocation)
             {
@@ -123,7 +124,12 @@ namespace Ketch
 
             int cols = _settings.ShowSeconds ? 5 : 3;
             for (int i = 0; i < cols; i++)
+            {
                 ClockGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            }
+
+            var hourAlign = _settings.ShowSeconds ? HorizontalAlignment.Right : HorizontalAlignment.Right;
+            var minuteAlign = _settings.ShowSeconds ? HorizontalAlignment.Left : HorizontalAlignment.Left;
 
             for (int i = 0; i < cols; i++)
             {
@@ -135,31 +141,41 @@ namespace Ketch
                     FontSize = 72,
                     FontFamily = GetClockFontFamily(),
                     TextAlignment = TextAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Center
                 };
+
+                if (_settings.ShowSeconds)
+                {
+                    if (i == 0) tb.HorizontalAlignment = HorizontalAlignment.Right;
+                    if (i == 1) tb.HorizontalAlignment = HorizontalAlignment.Center;
+                    if (i == 2) tb.HorizontalAlignment = HorizontalAlignment.Left;
+                    if (i == 3) tb.HorizontalAlignment = HorizontalAlignment.Center;
+                    if (i == 4) tb.HorizontalAlignment = HorizontalAlignment.Left;
+                }
+                else
+                {
+                    if (i == 0) tb.HorizontalAlignment = HorizontalAlignment.Right;
+                    if (i == 1) tb.HorizontalAlignment = HorizontalAlignment.Center;
+                    if (i == 2) tb.HorizontalAlignment = HorizontalAlignment.Left;
+                }
+
                 vb.Child = tb;
                 Grid.SetColumn(vb, i);
                 ClockGrid.Children.Add(vb);
             }
         }
 
-        private FontFamily GetClockFontFamily()
+        private static FontFamily GetClockFontFamily()
         {
-            var fontFile = Path.Combine(AppContext.BaseDirectory, "Assets", "ketch_font.otf");
-            if (File.Exists(fontFile))
+            try
             {
-                try
-                {
-                    var uri = new Uri(fontFile);
-                    return new FontFamily(new Uri("file:///" + uri.LocalPath), "#ketch_font");
-                }
-                catch
-                {
-                    return new FontFamily("Segoe UI");
-                }
+                return new FontFamily(new Uri("pack://application:,,,/"), "./Assets/#Poketch Clock Numeral");
             }
-
-            return new FontFamily("Segoe UI");
+            catch
+            {
+                return new FontFamily("Segoe UI");
+            }
         }
 
         private void UpdateClock()

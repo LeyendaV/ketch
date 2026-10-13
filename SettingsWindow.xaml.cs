@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Windows;
 
@@ -79,13 +80,13 @@ namespace Ketch
 
         private void BtnOk_Click(object sender, RoutedEventArgs e)
         {
-            var bg = ((string, string))cbBackground.SelectedItem;
-            var ft = ((string, string))cbFont.SelectedItem;
+            var bg = ((string name, string hex))cbBackground.SelectedItem;
+            var ft = ((string name, string hex))cbFont.SelectedItem;
 
-            _working.Background = bg.Item1;
-            _working.BackgroundHex = bg.Item2;
-            _working.Font = ft.Item1;
-            _working.FontHex = ft.Item2;
+            _working.Background = bg.name;
+            _working.BackgroundHex = bg.hex;
+            _working.Font = ft.name;
+            _working.FontHex = ft.hex;
             _working.Opacity = (int)cbOpacity.SelectedItem;
             _working.Size = (string)cbSize.SelectedItem;
             _working.DisplayLocation = (string)cbLocation.SelectedItem;
