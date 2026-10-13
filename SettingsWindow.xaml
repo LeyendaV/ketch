@@ -1,49 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Window x:Class="Ketch.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Settings" Height="480" Width="380" WindowStartupLocation="CenterOwner">
-    <StackPanel Margin="12" VerticalAlignment="Top">
-        <TextBlock Text="Background Color" FontWeight="Bold" />
-        <ComboBox x:Name="cbBackground" Margin="0,4" />
+        Title="Settings" Height="480" Width="380" WindowStartupLocation="CenterOwner"
+        WindowStyle="None" AllowsTransparency="True" Background="#22242a" ShowInTaskbar="False">
+    <Border Background="#22242a" Padding="16">
+        <StackPanel Margin="0" VerticalAlignment="Top" Foreground="#bac6e8" FontSize="14">
+            <TextBlock Text="Background Color" FontWeight="Bold" />
+            <ComboBox x:Name="cbBackground" Margin="0,6" />
 
-        <TextBlock Text="Font Color" FontWeight="Bold" Margin="0,8,0,0" />
-        <ComboBox x:Name="cbFont" Margin="0,4" />
+            <TextBlock Text="Font Color" FontWeight="Bold" Margin="0,8,0,0" />
+            <ComboBox x:Name="cbFont" Margin="0,6" />
 
-        <TextBlock Text="Opacity" FontWeight="Bold" Margin="0,8,0,0" />
-        <StackPanel Orientation="Horizontal" Margin="0,4">
-            <Slider x:Name="sliderOpacity" Minimum="10" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Width="220" />
-            <TextBlock x:Name="tbOpacityValue" Width="40" Margin="8,0,0,0" VerticalAlignment="Center" />
+            <TextBlock Text="Opacity" FontWeight="Bold" Margin="0,8,0,0" />
+            <StackPanel Orientation="Horizontal" Margin="0,6">
+                <Slider x:Name="sliderOpacity" Minimum="10" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Width="220" />
+                <TextBlock x:Name="tbOpacityValue" Width="40" Margin="8,0,0,0" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <TextBlock Text="Size" FontWeight="Bold" Margin="0,8,0,0" />
+            <StackPanel Orientation="Horizontal" Margin="0,6">
+                <RadioButton x:Name="rbSizeHuge" Content="Huge" GroupName="Size" Margin="0,0,8,0" />
+                <RadioButton x:Name="rbSizeBig" Content="Big" GroupName="Size" Margin="0,0,8,0" />
+                <RadioButton x:Name="rbSizeMedium" Content="Medium" GroupName="Size" Margin="0,0,8,0" />
+                <RadioButton x:Name="rbSizeSmall" Content="Small" GroupName="Size" />
+            </StackPanel>
+
+            <TextBlock Text="Display Location" FontWeight="Bold" Margin="0,8,0,0" />
+            <StackPanel Orientation="Vertical" Margin="0,6">
+                <RadioButton x:Name="rbLocationBottomRight" Content="Bottom Right" GroupName="Location" />
+                <RadioButton x:Name="rbLocationBottomLeft" Content="Bottom Left" GroupName="Location" />
+                <RadioButton x:Name="rbLocationTopLeft" Content="Top Left" GroupName="Location" />
+                <RadioButton x:Name="rbLocationTopRight" Content="Top Right" GroupName="Location" />
+            </StackPanel>
+
+            <TextBlock Text="Time Format" FontWeight="Bold" Margin="0,8,0,0" />
+            <StackPanel Orientation="Horizontal" Margin="0,6">
+                <RadioButton x:Name="rbTime12" Content="12 hs." GroupName="TimeFormat" Margin="0,0,8,0" />
+                <RadioButton x:Name="rbTime24" Content="24 hs." GroupName="TimeFormat" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,10">
+                <CheckBox x:Name="chkSeconds" Content="Show Seconds" />
+            </StackPanel>
         </StackPanel>
-
-        <TextBlock Text="Size" FontWeight="Bold" Margin="0,8,0,0" />
-        <StackPanel Orientation="Horizontal" Margin="0,4">
-            <RadioButton x:Name="rbSizeHuge" Content="Huge" GroupName="Size" Margin="0,0,8,0" />
-            <RadioButton x:Name="rbSizeBig" Content="Big" GroupName="Size" Margin="0,0,8,0" />
-            <RadioButton x:Name="rbSizeMedium" Content="Medium" GroupName="Size" Margin="0,0,8,0" />
-            <RadioButton x:Name="rbSizeSmall" Content="Small" GroupName="Size" />
-        </StackPanel>
-
-        <TextBlock Text="Display Location" FontWeight="Bold" Margin="0,8,0,0" />
-        <StackPanel Orientation="Vertical" Margin="0,4">
-            <RadioButton x:Name="rbLocationBottomRight" Content="Bottom Right" GroupName="Location" />
-            <RadioButton x:Name="rbLocationBottomLeft" Content="Bottom Left" GroupName="Location" />
-            <RadioButton x:Name="rbLocationTopLeft" Content="Top Left" GroupName="Location" />
-            <RadioButton x:Name="rbLocationTopRight" Content="Top Right" GroupName="Location" />
-        </StackPanel>
-
-        <TextBlock Text="Time Format" FontWeight="Bold" Margin="0,8,0,0" />
-        <StackPanel Orientation="Horizontal" Margin="0,4">
-            <RadioButton x:Name="rbTime12" Content="12 hs." GroupName="TimeFormat" Margin="0,0,8,0" />
-            <RadioButton x:Name="rbTime24" Content="24 hs." GroupName="TimeFormat" />
-        </StackPanel>
-
-        <StackPanel Orientation="Horizontal" Margin="0,10">
-            <CheckBox x:Name="chkSeconds" Content="Show Seconds" />
-        </StackPanel>
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-            <Button x:Name="btnOk" Width="80" Margin="4" Click="BtnOk_Click">OK</Button>
-            <Button x:Name="btnCancel" Width="80" Margin="4" Click="BtnCancel_Click">Cancel</Button>
-        </StackPanel>
-    </StackPanel>
+    </Border>
 </Window>

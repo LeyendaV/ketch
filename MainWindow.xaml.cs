@@ -74,6 +74,15 @@ namespace Ketch
             NativeMethods.SetWindowLong(hwnd, NativeMethods.GWL_EXSTYLE, exStyle);
         }
 
+        public void ApplyNewSettings(SettingsModel s)
+        {
+            _settings = s;
+            _settingsPath = _settings.Save(_settingsPath);
+            ApplySettings();
+            BuildClockGrid();
+            UpdateClock();
+        }
+
         public void ApplySettings()
         {
             if (_settings.Background == "Transparent")
@@ -246,14 +255,9 @@ namespace Ketch
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 var window = new SettingsWindow(_settings);
-                if (window.ShowDialog() == true)
-                {
-                    _settings = window.Result!;
-                    _settingsPath = _settings.Save(_settingsPath);
-                    ApplySettings();
-                    BuildClockGrid();
-                    UpdateClock();
-                }
+                window.Owner = this;
+                window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                window.Show();
             });
         }
 
