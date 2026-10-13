@@ -16,7 +16,7 @@ namespace Ketch
         private TrayIconManager _tray;
         private string _settingsPath;
 
-        public Brush BackgroundBrush
+        public System.Windows.Media.Brush BackgroundBrush
         {
             get => RootBorder.Background;
             set => RootBorder.Background = value;
