@@ -108,7 +108,7 @@ namespace Ketch
             var bgName = cbBackground.SelectedItem as string ?? _backgrounds[0].name;
             var bg = _backgrounds.First(b => b.name == bgName);
 
-            var ftName = cbFont.SelectedItem as string ?? _font_colors[0].name;
+            var ftName = cbFont.SelectedItem as string ?? _fontColors[0].name;
             var ft = _fontColors.First(f => f.name == ftName);
 
             _working.Background = bg.name;
