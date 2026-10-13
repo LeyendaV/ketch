@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 
@@ -47,8 +48,6 @@ namespace Ketch
 
             _fontColors = new List<(string name, string hex)>
             {
-                ("Black", "#000000"),
-                ("White", "#FFFFFF"),
                 ("Green", "#385030"),
                 ("Yellow", "#485030"),
                 ("Orange", "#504028"),
@@ -116,6 +115,13 @@ namespace Ketch
 
             _working.TimeFormat = (rbTime12.IsChecked == true) ? "12 hs." : "24 hs.";
             _working.ShowSeconds = chkSeconds.IsChecked == true;
+
+            try
+            {
+                var path = Path.Combine(AppContext.BaseDirectory, "ketch_settings_debug.log");
+                File.AppendAllText(path, $"{DateTime.UtcNow:o} - Settings OK: Background={_working.Background} ({_working.BackgroundHex}), Font={_working.Font} ({_working.FontHex}), Opacity={_working.Opacity}, Size={_working.Size}, Location={_working.DisplayLocation}, TimeFormat={_working.TimeFormat}, ShowSeconds={_working.ShowSeconds}\n");
+            }
+            catch { }
 
             Result = _working;
             DialogResult = true;
