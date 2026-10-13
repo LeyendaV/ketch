@@ -92,7 +92,7 @@ namespace Ketch
                 case "Bottom Right": rbLocationBottomRight.IsChecked = true; break;
                 case "Bottom Left": rbLocationBottomLeft.IsChecked = true; break;
                 case "Top Left": rbLocationTopLeft.IsChecked = true; break;
-                default: rbLocationTopRight.IsChecked = true; break;
+                default: rbLocationBottomRight.IsChecked = true; break;
             }
 
             if (_working.TimeFormat == "12 hs.") rbTime12.IsChecked = true; else rbTime24.IsChecked = true;

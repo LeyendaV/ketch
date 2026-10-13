@@ -151,45 +151,84 @@ namespace Ketch
 
             int cols = _settings.ShowSeconds ? 5 : 3;
 
+            // Create an inner grid that will be uniformly scaled by a single outer Viewbox. This guarantees all
+            // columns and characters are scaled together, keeping font sizes identical between columns and colons.
+            var inner = new Grid();
             for (int i = 0; i < cols; i++)
             {
-                ClockGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             }
 
             var fontFamily = TryLoadFontFamilyFromAssets() ?? new WMedia.FontFamily("Segoe UI");
+            // Use a large base font size; the outer Viewbox will scale down to fit the available space.
+            double baseFontSize = 400;
 
             for (int i = 0; i < cols; i++)
             {
-                var vb = new Viewbox { Stretch = WMedia.Stretch.Uniform, StretchDirection = StretchDirection.Both };
                 var tb = new TextBlock
                 {
                     Text = string.Empty,
                     Foreground = new WMedia.SolidColorBrush((WMedia.Color)WMedia.ColorConverter.ConvertFromString(_settings.FontHex)),
-                    FontSize = 72,
+                    FontSize = baseFontSize,
                     FontFamily = fontFamily,
                     TextAlignment = TextAlignment.Center,
-                    HorizontalAlignment = W.HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Center
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = W.HorizontalAlignment.Center
                 };
 
+                // Preserve the visual alignment intent (hours right-aligned, minutes center, seconds left-aligned)
                 if (_settings.ShowSeconds)
                 {
-                    if (i == 0) tb.HorizontalAlignment = W.HorizontalAlignment.Right;
-                    if (i == 1) tb.HorizontalAlignment = W.HorizontalAlignment.Center;
-                    if (i == 2) tb.HorizontalAlignment = W.HorizontalAlignment.Left;
-                    if (i == 3) tb.HorizontalAlignment = W.HorizontalAlignment.Center;
-                    if (i == 4) tb.HorizontalAlignment = W.HorizontalAlignment.Left;
+                    if (i == 0) { tb.TextAlignment = TextAlignment.Right; tb.HorizontalAlignment = W.HorizontalAlignment.Right; }
+                    if (i == 1) { tb.TextAlignment = TextAlignment.Center; tb.HorizontalAlignment = W.HorizontalAlignment.Center; }
+                    if (i == 2) { tb.TextAlignment = TextAlignment.Left; tb.HorizontalAlignment = W.HorizontalAlignment.Left; }
+                    if (i == 3) { tb.TextAlignment = TextAlignment.Center; tb.HorizontalAlignment = W.HorizontalAlignment.Center; }
+                    if (i == 4) { tb.TextAlignment = TextAlignment.Left; tb.HorizontalAlignment = W.HorizontalAlignment.Left; }
                 }
                 else
                 {
-                    if (i == 0) tb.HorizontalAlignment = W.HorizontalAlignment.Right;
-                    if (i == 1) tb.HorizontalAlignment = W.HorizontalAlignment.Center;
-                    if (i == 2) tb.HorizontalAlignment = W.HorizontalAlignment.Left;
+                    if (i == 0) { tb.TextAlignment = TextAlignment.Right; tb.HorizontalAlignment = W.HorizontalAlignment.Right; }
+                    if (i == 1) { tb.TextAlignment = TextAlignment.Center; tb.HorizontalAlignment = W.HorizontalAlignment.Center; }
+                    if (i == 2) { tb.TextAlignment = TextAlignment.Left; tb.HorizontalAlignment = W.HorizontalAlignment.Left; }
                 }
 
-                vb.Child = tb;
-                Grid.SetColumn(vb, i);
-                ClockGrid.Children.Add(vb);
+                Grid.SetColumn(tb, i);
+                inner.Children.Add(tb);
+            }
+
+            var outer = new Viewbox { Child = inner, Stretch = WMedia.Stretch.Uniform };
+            ClockGrid.Children.Add(outer);
+        }
+
+        private void UpdateClock()
+        {
+            var now = DateTime.Now;
+            string hour = _settings.TimeFormat == "12 hs." ? now.ToString("hh") : now.ToString("HH");
+            string minute = now.ToString("mm");
+            string second = now.ToString("ss");
+
+            if (ClockGrid.Children.Count == 0) return;
+
+            var inner = (Grid)((Viewbox)ClockGrid.Children[0]).Child;
+            if (!_settings.ShowSeconds)
+            {
+                if (inner.Children.Count >= 3)
+                {
+                    ((TextBlock)inner.Children[0]).Text = hour;
+                    ((TextBlock)inner.Children[1]).Text = ":";
+                    ((TextBlock)inner.Children[2]).Text = minute;
+                }
+            }
+            else
+            {
+                if (inner.Children.Count >= 5)
+                {
+                    ((TextBlock)inner.Children[0]).Text = hour;
+                    ((TextBlock)inner.Children[1]).Text = ":";
+                    ((TextBlock)inner.Children[2]).Text = minute;
+                    ((TextBlock)inner.Children[3]).Text = ":";
+                    ((TextBlock)inner.Children[4]).Text = second;
+                }
             }
         }
 
@@ -258,35 +297,6 @@ namespace Ketch
 
             // Not found
             return null;
-        }
-
-        private void UpdateClock()
-        {
-            var now = DateTime.Now;
-            string hour = _settings.TimeFormat == "12 hs." ? now.ToString("hh") : now.ToString("HH");
-            string minute = now.ToString("mm");
-            string second = now.ToString("ss");
-
-            if (!_settings.ShowSeconds)
-            {
-                if (ClockGrid.Children.Count >= 3)
-                {
-                    ((TextBlock)((Viewbox)ClockGrid.Children[0]).Child).Text = hour;
-                    ((TextBlock)((Viewbox)ClockGrid.Children[1]).Child).Text = ":";
-                    ((TextBlock)((Viewbox)ClockGrid.Children[2]).Child).Text = minute;
-                }
-            }
-            else
-            {
-                if (ClockGrid.Children.Count >= 5)
-                {
-                    ((TextBlock)((Viewbox)ClockGrid.Children[0]).Child).Text = hour;
-                    ((TextBlock)((Viewbox)ClockGrid.Children[1]).Child).Text = ":";
-                    ((TextBlock)((Viewbox)ClockGrid.Children[2]).Child).Text = minute;
-                    ((TextBlock)((Viewbox)ClockGrid.Children[3]).Child).Text = ":";
-                    ((TextBlock)((Viewbox)ClockGrid.Children[4]).Child).Text = second;
-                }
-            }
         }
 
         private void OpenSettings()

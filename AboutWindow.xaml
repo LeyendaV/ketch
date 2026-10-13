@@ -7,7 +7,7 @@
     <Border Background="#22242a" Padding="16">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="Version 1.0.0 (October 2026)" Margin="0,6" Foreground="#bac6e8" FontSize="15" TextAlignment="Center" />
+                <TextBlock Text="ketch — Version 1.0.0 (October 2026)" Margin="0,6" Foreground="#bac6e8" FontSize="15" TextAlignment="Center" />
                 <TextBlock Text="Developed by LeyendaV. Clock Font by CrazyMatt." Margin="0,6" Foreground="#bac6e8" FontSize="15" TextAlignment="Center" />
                 <TextBlock Margin="0,6" HorizontalAlignment="Center" TextAlignment="Center">
                     <Hyperlink NavigateUri="https://github.com/LeyendaV/ketch" RequestNavigate="Hyperlink_RequestNavigate" Foreground="#7aacff">https://github.com/LeyendaV/ketch</Hyperlink>
