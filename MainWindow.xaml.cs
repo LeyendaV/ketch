@@ -33,8 +33,6 @@ namespace Ketch
                 _settings = loaded.settings;
                 _settingsPath = loaded.path;
 
-                // AllowsTransparency must be set before the window handle is created (before calling WindowInteropHelper.Handle).
-                // Set it early here, so later calls that obtain the HWND (for click-through) won't cause an InvalidOperationException.
                 AllowsTransparency = true;
 
                 var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "ketch_icon.ico");
@@ -48,7 +46,6 @@ namespace Ketch
             }
             catch (Exception ex)
             {
-                // Log and show a friendly message, then exit
                 try
                 {
                     var logPath = Path.Combine(AppContext.BaseDirectory, "ketch_error.log");
@@ -82,12 +79,10 @@ namespace Ketch
             if (_settings.Background == "Transparent")
             {
                 BackgroundBrush = WMedia.Brushes.Transparent;
-                // AllowsTransparency must not be changed after the window handle exists; set in constructor instead.
             }
             else
             {
                 BackgroundBrush = new WMedia.SolidColorBrush((WMedia.Color)WMedia.ColorConverter.ConvertFromString(_settings.BackgroundHex));
-                // AllowsTransparency must not be changed after the window handle exists; set in constructor instead.
             }
 
             Opacity = _settings.Opacity / 100.0;
@@ -188,15 +183,33 @@ namespace Ketch
 
         private static WMedia.FontFamily GetClockFontFamily()
         {
-            try
+            var candidateNames = new[]
             {
-                // Use site-of-origin pack URI so the font bundled as Content (copied to output) is discoverable at runtime.
-                return new WMedia.FontFamily(new Uri("pack://siteoforigin:,,,/"), "./Assets/#Poketch Clock Numeral");
-            }
-            catch
+                "Poketch Clock Numeral",
+                "Poketch Clock",
+                "Ketch Font",
+                "ketch_font",
+                "Ketch",
+                "Segoe UI"
+            };
+
+            foreach (var candidate in candidateNames)
             {
-                return new WMedia.FontFamily("Segoe UI");
+                foreach (var baseUri in new[]
+                {
+                    new Uri("pack://application:,,,/"),
+                    new Uri("pack://siteoforigin:,,,/")
+                })
+                {
+                    try
+                    {
+                        return new WMedia.FontFamily(baseUri, $"./Assets/#{candidate}");
+                    }
+                    catch { }
+                }
             }
+
+            return new WMedia.FontFamily("Segoe UI");
         }
 
         private void UpdateClock()
