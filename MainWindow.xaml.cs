@@ -52,7 +52,7 @@ namespace Ketch
                 }
                 catch { }
 
-                MessageBox.Show("ketch failed to start. Please check ketch_error.log next to the executable or in %LOCALAPPDATA%\\ketch.", "ketch - Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("ketch failed to start. Please check ketch_error.log next to the executable or in %LOCALAPPDATA%\\ketch.", "ketch - Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Environment.Exit(1);
             }
         }

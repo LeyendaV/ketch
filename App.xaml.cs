@@ -23,7 +23,7 @@ namespace Ketch
             try
             {
                 LogException(e.Exception, "DispatcherUnhandledException");
-                MessageBox.Show($"ketch has encountered an error and needs to close. A log file was written to:\n{LogFilePath}", "ketch - Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show($"ketch has encountered an error and needs to close. A log file was written to:\n{LogFilePath}", "ketch - Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch { }
             finally
