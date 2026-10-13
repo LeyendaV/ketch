@@ -70,9 +70,16 @@ namespace Ketch
                     exitItem
                 });
 
-                // Ensure the menu closes when it loses focus or the user clicks outside
-                menu.Closed += (_, __) => menu.Dispose();
-                menu.LostFocus += (_, __) => { try { menu.Close(); } catch { } };
+                // Dispose the menu asynchronously after it closes to avoid disposing while WinForms processes click events.
+                menu.Closed += (s, ev) =>
+                {
+                    try
+                    {
+                        // BeginInvoke schedules disposal after current WinForms events finish.
+                        menu.BeginInvoke(new Action(() => { try { menu.Dispose(); } catch { } }));
+                    }
+                    catch { }
+                };
 
                 menu.Show(Cursor.Position);
             }
