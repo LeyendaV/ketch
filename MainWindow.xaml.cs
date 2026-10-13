@@ -133,7 +133,7 @@ namespace Ketch
 
             for (int i = 0; i < cols; i++)
             {
-                var vb = new Viewbox { Stretch = Stretch.Uniform, StretchDirection = StretchDirection.Both };
+                var vb = new Viewbox { Stretch = WMedia.Stretch.Uniform, StretchDirection = StretchDirection.Both };
                 var tb = new TextBlock
                 {
                     Text = string.Empty,
@@ -214,7 +214,7 @@ namespace Ketch
                 var window = new SettingsWindow(_settings);
                 if (window.ShowDialog() == true)
                 {
-                    _settings = window.Result;
+                    _settings = window.Result!;
                     _settingsPath = _settings.Save(_settingsPath);
                     ApplySettings();
                 }
