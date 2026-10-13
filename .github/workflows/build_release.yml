@@ -1,0 +1,25 @@
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
+
+  - name: Setup .NET
+    uses: actions/setup-dotnet@v3
+    with:
+      dotnet-version: '7.0.x'
+
+  - name: Restore
+    run: dotnet restore ketch.csproj
+
+  - name: Build & Publish
+    run: |
+      dotnet publish ketch.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=false -o ./artifacts
+
+  - name: List artifacts
+    run: dir artifacts
+
+  - name: Create GitHub Release
+    uses: ncipollo/release-action@v1
+    with:
+      tag: ${{ github.ref_name || github.sha }}
+      name: ketch-release-${{ github.run_id }}
+      files: ./artifacts/*.exe
