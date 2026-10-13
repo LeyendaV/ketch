@@ -9,6 +9,8 @@ namespace Ketch
         public AboutWindow()
         {
             InitializeComponent();
+            // Close when the window loses activation (click outside).
+            this.Deactivated += (s, e) => this.Close();
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)

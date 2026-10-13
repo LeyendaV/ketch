@@ -236,8 +236,6 @@ namespace Ketch
                 if (window.ShowDialog() == true)
                 {
                     _settings = window.Result!;
-        
-                    // Force the window to refresh immediately after OK.
                     _settingsPath = _settings.Save(_settingsPath);
                     ApplySettings();
                     BuildClockGrid();
@@ -252,7 +250,7 @@ namespace Ketch
             {
                 var about = new AboutWindow();
                 about.Owner = this;
-                about.ShowDialog();
+                about.Show();
             });
         }
 

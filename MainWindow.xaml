@@ -10,7 +10,7 @@
         ShowInTaskbar="False"
         Topmost="True"
         Loaded="Window_Loaded">
-    <Border x:Name="RootBorder" Background="Transparent" Padding="50">
+    <Border x:Name="RootBorder" Background="Transparent" Padding="20">
         <Grid x:Name="ClockGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         </Grid>
     </Border>
