@@ -151,17 +151,34 @@ namespace Ketch
 
             int cols = _settings.ShowSeconds ? 5 : 3;
 
-            // Create an inner grid that will be uniformly scaled by a single outer Viewbox. This guarantees all
-            // columns and characters are scaled together, keeping font sizes identical between columns and colons.
+            // Load font and choose a large base size for measurement. The outer Viewbox will scale uniformly to fit.
+            var fontFamily = TryLoadFontFamilyFromAssets() ?? new WMedia.FontFamily("Segoe UI");
+            double baseFontSize = 400;
+
+            // Measure widest glyph among digits and colon so each column uses the same fixed width.
+            double maxGlyphWidth = 0;
+            var toMeasure = new[] { "0","1","2","3","4","5","6","7","8","9",":" };
+            foreach (var ch in toMeasure)
+            {
+                var meas = new TextBlock
+                {
+                    Text = ch,
+                    FontFamily = fontFamily,
+                    FontSize = baseFontSize,
+                    FontStretch = FontStretches.Normal,
+                    FontStyle = FontStyles.Normal,
+                    FontWeight = FontWeights.Normal
+                };
+                meas.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                if (meas.DesiredSize.Width > maxGlyphWidth) maxGlyphWidth = meas.DesiredSize.Width;
+            }
+
+            // Create inner grid with fixed pixel column widths (equal for every column).
             var inner = new Grid();
             for (int i = 0; i < cols; i++)
             {
-                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                inner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(maxGlyphWidth, GridUnitType.Pixel) });
             }
-
-            var fontFamily = TryLoadFontFamilyFromAssets() ?? new WMedia.FontFamily("Segoe UI");
-            // Use a large base font size; the outer Viewbox will scale down to fit the available space.
-            double baseFontSize = 400;
 
             for (int i = 0; i < cols; i++)
             {
@@ -173,10 +190,11 @@ namespace Ketch
                     FontFamily = fontFamily,
                     TextAlignment = TextAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = W.HorizontalAlignment.Center
+                    HorizontalAlignment = W.HorizontalAlignment.Center,
+                    Width = maxGlyphWidth
                 };
 
-                // Preserve the visual alignment intent (hours right-aligned, minutes center, seconds left-aligned)
+                // Preserve alignment intent per column
                 if (_settings.ShowSeconds)
                 {
                     if (i == 0) { tb.TextAlignment = TextAlignment.Right; tb.HorizontalAlignment = W.HorizontalAlignment.Right; }
@@ -198,6 +216,73 @@ namespace Ketch
 
             var outer = new Viewbox { Child = inner, Stretch = WMedia.Stretch.Uniform };
             ClockGrid.Children.Add(outer);
+        }
+
+        private WMedia.FontFamily? TryLoadFontFamilyFromAssets()
+        {
+            // 1) Try to load directly from the font file in the output Assets folder (site of origin). This does not require installing the font.
+            try
+            {
+                var fontFile = Path.Combine(AppContext.BaseDirectory, "Assets", "ketch_font.ttf");
+                if (File.Exists(fontFile))
+                {
+                    // Use GlyphTypeface to read the internal family name from the TTF
+                    var glyph = new WMedia.GlyphTypeface(new Uri(fontFile));
+
+                    // Pick a suitable family name (prefer current UI culture, then en-US, then first)
+                    string familyName = null!;
+                    if (glyph.FamilyNames.TryGetValue(CultureInfo.CurrentUICulture, out var name)) familyName = name;
+                    else if (glyph.FamilyNames.TryGetValue(new CultureInfo("en-US"), out name)) familyName = name;
+                    else familyName = glyph.FamilyNames.Values.FirstOrDefault() ?? "Poketch Clock Numeral";
+
+                    // Create a FontFamily that points to the local font file directory and the internal family name
+                    var folder = Path.GetDirectoryName(fontFile)!;
+                    var folderUri = new Uri(folder.EndsWith("/") || folder.EndsWith("\\") ? folder : folder + Path.DirectorySeparatorChar);
+
+                    try
+                    {
+                        return new WMedia.FontFamily(folderUri, $"./#{familyName}");
+                    }
+                    catch { }
+
+                    // Last resort: try siteoforigin pack URI with the discovered family name
+                    try
+                    {
+                        return new WMedia.FontFamily(new Uri("pack://siteoforigin:,,,/"), $"./Assets/#{familyName}");
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
+            // 2) Try to enumerate fonts from site-of-origin Assets folder
+            try
+            {
+                var siteUri = new Uri("pack://siteoforigin:,,,/Assets/");
+                var families = WMedia.Fonts.GetFontFamilies(siteUri, "./");
+                foreach (var f in families)
+                {
+                    if (f.Source.IndexOf("Poketch", StringComparison.OrdinalIgnoreCase) >= 0 || f.Source.IndexOf("ketch", StringComparison.OrdinalIgnoreCase) >= 0)
+                        return f;
+                }
+            }
+            catch { }
+
+            // 3) Try application resources (embedded resource)
+            try
+            {
+                var appUri = new Uri("pack://application:,,,/Assets/");
+                var families = WMedia.Fonts.GetFontFamilies(appUri, "./");
+                foreach (var f in families)
+                {
+                    if (f.Source.IndexOf("Poketch", StringComparison.OrdinalIgnoreCase) >= 0 || f.Source.IndexOf("ketch", StringComparison.OrdinalIgnoreCase) >= 0)
+                        return f;
+                }
+            }
+            catch { }
+
+            // Not found
+            return null;
         }
 
         private void UpdateClock()
