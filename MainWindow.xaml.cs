@@ -224,7 +224,7 @@ namespace Ketch
                 inner.Children.Add(tb);
             }
 
-            var outer = new Viewbox { Child = inner, Stretch = WMedia.Stretch.Uniform, StretchDirection = StretchDirection.Both, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+            var outer = new Viewbox { Child = inner, Stretch = WMedia.Stretch.Uniform, StretchDirection = StretchDirection.Both, HorizontalAlignment = W.HorizontalAlignment.Stretch, VerticalAlignment = W.VerticalAlignment.Stretch };
             ClockGrid.Children.Add(outer);
         }
 
