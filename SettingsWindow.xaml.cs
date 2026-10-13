@@ -136,8 +136,10 @@ namespace Ketch
 
         private void ApplyToOwnerAndSave()
         {
-            // If we have an owner, ask it to apply and save the settings. Otherwise, save to default path.
-            if (this.Owner is MainWindow mw)
+            // Try to find a MainWindow to apply settings to. Prefer Owner, but fall back to the application's MainWindow or any live MainWindow.
+            var mw = this.Owner as MainWindow ?? Application.Current?.Windows.OfType<MainWindow>().FirstOrDefault();
+
+            if (mw != null)
             {
                 try
                 {
