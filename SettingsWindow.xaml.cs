@@ -14,6 +14,7 @@ namespace Ketch
         private readonly SettingsModel _working;
         private readonly List<(string name, string hex)> _backgrounds;
         private readonly List<(string name, string hex)> _fontColors;
+        private bool _isInitializing = true;
 
         public SettingsWindow(SettingsModel current)
         {
@@ -73,12 +74,20 @@ namespace Ketch
                 OnSettingChanged(s, null);
             };
 
-            rbSizeHuge.Checked += OnSettingChanged; rbSizeBig.Checked += OnSettingChanged; rbSizeMedium.Checked += OnSettingChanged; rbSizeSmall.Checked += OnSettingChanged;
-            rbLocationBottomRight.Checked += OnSettingChanged; rbLocationBottomLeft.Checked += OnSettingChanged; rbLocationTopLeft.Checked += OnSettingChanged; rbLocationTopRight.Checked += OnSettingChanged;
-            rbTime12.Checked += OnSettingChanged; rbTime24.Checked += OnSettingChanged;
-            chkSeconds.Checked += OnSettingChanged; chkSeconds.Unchecked += OnSettingChanged;
+            rbSizeHuge.Checked += OnSettingChanged;
+            rbSizeBig.Checked += OnSettingChanged;
+            rbSizeMedium.Checked += OnSettingChanged;
+            rbSizeSmall.Checked += OnSettingChanged;
+            rbLocationBottomRight.Checked += OnSettingChanged;
+            rbLocationBottomLeft.Checked += OnSettingChanged;
+            rbLocationTopLeft.Checked += OnSettingChanged;
+            rbLocationTopRight.Checked += OnSettingChanged;
+            rbTime12.Checked += OnSettingChanged;
+            rbTime24.Checked += OnSettingChanged;
+            chkSeconds.Checked += OnSettingChanged;
+            chkSeconds.Unchecked += OnSettingChanged;
 
-            // Initialize radio states
+            // Restore the saved control state without treating initialization as user input.
             switch (_working.Size)
             {
                 case "Huge": rbSizeHuge.IsChecked = true; break;
@@ -92,22 +101,25 @@ namespace Ketch
                 case "Bottom Right": rbLocationBottomRight.IsChecked = true; break;
                 case "Bottom Left": rbLocationBottomLeft.IsChecked = true; break;
                 case "Top Left": rbLocationTopLeft.IsChecked = true; break;
+                case "Top Right": rbLocationTopRight.IsChecked = true; break;
                 default: rbLocationBottomRight.IsChecked = true; break;
             }
 
             if (_working.TimeFormat == "12 hs.") rbTime12.IsChecked = true; else rbTime24.IsChecked = true;
             chkSeconds.IsChecked = _working.ShowSeconds;
 
-            // Close when clicking outside (lose activation)
-            this.Deactivated += (s, e) => { ApplyToOwnerAndSave(); this.Close(); };
+            _isInitializing = false;
+
+            // Close when clicking outside (lose activation).
+            Deactivated += (s, e) => { ApplyToOwnerAndSave(); Close(); };
         }
 
         private void OnSettingChanged(object? sender, RoutedEventArgs? e)
         {
-            // Read UI into _working
+            if (_isInitializing) return;
+
             var bgName = cbBackground.SelectedItem as string ?? _backgrounds[0].name;
             var bg = _backgrounds.First(b => b.name == bgName);
-
             var ftName = cbFont.SelectedItem as string ?? _fontColors[0].name;
             var ft = _fontColors.First(f => f.name == ftName);
 
@@ -127,17 +139,15 @@ namespace Ketch
             else if (rbLocationTopLeft.IsChecked == true) _working.DisplayLocation = "Top Left";
             else _working.DisplayLocation = "Top Right";
 
-            _working.TimeFormat = (rbTime12.IsChecked == true) ? "12 hs." : "24 hs.";
+            _working.TimeFormat = rbTime12.IsChecked == true ? "12 hs." : "24 hs.";
             _working.ShowSeconds = chkSeconds.IsChecked == true;
 
-            // Apply immediately to owner
             ApplyToOwnerAndSave();
         }
 
         private void ApplyToOwnerAndSave()
         {
-            // Try to find a MainWindow to apply settings to. Prefer Owner, but fall back to the application's MainWindow or any live MainWindow.
-            var mw = this.Owner as MainWindow ?? System.Windows.Application.Current?.Windows.OfType<MainWindow>().FirstOrDefault();
+            var mw = Owner as MainWindow ?? System.Windows.Application.Current?.Windows.OfType<MainWindow>().FirstOrDefault();
 
             if (mw != null)
             {
@@ -151,18 +161,16 @@ namespace Ketch
             {
                 try
                 {
-                    // Determine a sensible path and save locally
                     var pair = SettingsModel.LoadWithAutoPath();
                     _working.Save(pair.path);
                 }
                 catch { }
             }
 
-            // Also write a small debug trace
             try
             {
                 var path = Path.Combine(AppContext.BaseDirectory, "ketch_settings_debug.log");
-                File.AppendAllText(path, $"{DateTime.UtcNow:o} - AutoApply: Background={_working.Background} ({_working.BackgroundHex}), Font={_working.Font} ({_working.FontHex}), Opacity={_working.Opacity}, Size={_working.Size}, Location={_working.DisplayLocation}, TimeFormat={_working.TimeFormat}, ShowSeconds={_working.ShowSeconds}\n");
+                File.AppendAllText(path, $"{DateTime.UtcNow:o} - AutoApply: Background={_working.Background} ({_working.BackgroundHex}), Font={_working.Font} ({_working.FontHex}), Opacity={_working.Opacity}, Size={_working.Size}, Location={_working.DisplayLocation}, TimeFormat={_working.TimeFormat}, ShowSeconds={_working.ShowSeconds}{Environment.NewLine}");
             }
             catch { }
         }
