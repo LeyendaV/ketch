@@ -16,7 +16,7 @@ You can customize several aspects of the clock.
 - The color pallets are faithful depictions of the actual ones used in-game. You can mix font and background colors as you prefer. There's also an option for a transparent background.
 - The opacity slider controls the opacity (I know, shocking) of both the background AND the font at once. You can't change them individually.
 - The four sizes will change depending on your actual display: "Huge" will set the width and height of the window to ~50% of the height of the display the app is running on, "Big" will set the same values to ~35% of the height of the display, "Medium" will set them to ~20%, and "Small" to ~10%.
-- The app tries to store settings next to the main EXE, and if doing so it's impossible, it falls back to `%LOCALAPPDATA%\ketch\ketch.settings.json`.
+- The app tries to store settings next to the main EXE, and if doing so it's impossible, it falls back to `%LOCALAPPDATA%\ketch\settings.json`.
 
 ## Credits
 - LeyendaV (Dev).
