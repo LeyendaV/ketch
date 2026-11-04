@@ -9,6 +9,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>ketch</AssemblyName>
     <RootNamespace>Ketch</RootNamespace>
+    <ApplicationIcon>Assets\ketch_icon.ico</ApplicationIcon>
 
     <!-- Publish a self-contained, single-file Windows x64 application. -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -166,13 +165,6 @@ namespace Ketch
                 }
                 catch { }
             }
-
-            try
-            {
-                var path = Path.Combine(AppContext.BaseDirectory, "ketch_settings_debug.log");
-                File.AppendAllText(path, $"{DateTime.UtcNow:o} - AutoApply: Background={_working.Background} ({_working.BackgroundHex}), Font={_working.Font} ({_working.FontHex}), Opacity={_working.Opacity}, Size={_working.Size}, Location={_working.DisplayLocation}, TimeFormat={_working.TimeFormat}, ShowSeconds={_working.ShowSeconds}{Environment.NewLine}");
-            }
-            catch { }
         }
     }
 }
