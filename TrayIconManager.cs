@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace Ketch
@@ -10,33 +11,43 @@ namespace Ketch
         private readonly Action _openSettings;
         private readonly Action _openAbout;
         private readonly Action _exit;
-        private readonly string _iconPath;
         private ContextMenuStrip? _menu;
 
+        // The iconPath parameter is retained for source compatibility; the icon is now loaded
+        // from the WPF Resource embedded in the single-file application.
         public TrayIconManager(Action openSettings, Action openAbout, Action exit, string iconPath)
         {
             _openSettings = openSettings;
             _openAbout = openAbout;
             _exit = exit;
-            _iconPath = iconPath;
             _notify = new NotifyIcon();
         }
 
         public void Initialize()
         {
-            if (System.IO.File.Exists(_iconPath))
+            try
             {
-                _notify.Icon = new Icon(_iconPath);
+                var resource = System.Windows.Application.GetResourceStream(
+                    new Uri("pack://application:,,,/Assets/ketch_icon.ico", UriKind.Absolute));
+                if (resource != null)
+                {
+                    using (resource.Stream)
+                    using (var loadedIcon = new Icon(resource.Stream))
+                    {
+                        _notify.Icon = (Icon)loadedIcon.Clone();
+                    }
+                }
+                else
+                {
+                    _notify.Icon = SystemIcons.Application;
+                }
             }
-            else
+            catch
             {
                 _notify.Icon = SystemIcons.Application;
             }
 
-            // Set the tooltip text shown on hover
             _notify.Text = "ketch clock";
-
-            // Create a persistent context menu and attach it to the NotifyIcon so that clicking outside closes it normally
             _menu = new ContextMenuStrip();
             var settingsItem = new ToolStripMenuItem("Settings");
             settingsItem.Click += (_, _) => _openSettings?.Invoke();
@@ -56,7 +67,6 @@ namespace Ketch
             });
 
             _notify.ContextMenuStrip = _menu;
-
             _notify.Visible = true;
             _notify.MouseClick += Notify_MouseClick;
             _notify.MouseDoubleClick += Notify_MouseDoubleClick;
@@ -64,19 +74,12 @@ namespace Ketch
 
         private void Notify_MouseDoubleClick(object? sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
-            {
-                _openSettings?.Invoke();
-            }
+            if (e.Button == MouseButtons.Left) _openSettings?.Invoke();
         }
 
         private void Notify_MouseClick(object? sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right)
-            {
-                // Show the persistent context menu; Windows will handle closing it when the user clicks outside
-                _menu?.Show(Cursor.Position);
-            }
+            if (e.Button == MouseButtons.Right) _menu?.Show(Cursor.Position);
         }
 
         public void Dispose()

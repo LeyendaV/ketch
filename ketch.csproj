@@ -9,21 +9,23 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>ketch</AssemblyName>
     <RootNamespace>Ketch</RootNamespace>
+
+    <!-- Publish a self-contained, single-file Windows x64 application. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="8.0.0" />
   </ItemGroup>
 
+  <!-- WPF Resource items are embedded in the application assembly; do not copy loose assets to publish output. -->
   <ItemGroup>
     <Resource Include="Assets\ketch_icon.ico" />
     <Resource Include="Assets\ketch_font.ttf" />
-
-    <Content Include="Assets\ketch_icon.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\ketch_font.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 </Project>
